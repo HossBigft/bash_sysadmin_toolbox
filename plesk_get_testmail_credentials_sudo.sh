@@ -16,6 +16,10 @@ MAIL_DESCRIPTION='throwaway mail for troubleshooting purposes. You may delete it
 MAIL_PASSWORD_LENGTH='15'
 
 get_mail_password() {
+    if [[ $# -ne 1 ]]; then
+        printf "Error: Too many or no arguments provided\n" 1>&2
+        exit 1
+    fi
     local domain="$1"
     if ! is_valid_domain "$domain"; then
         printf "Error: Invalid input\n" 1>&2
@@ -25,6 +29,10 @@ get_mail_password() {
 }
 
 create_testmail() {
+    if [[ $# -ne 2 ]]; then
+        printf "Error: Too many or no arguments provided\n" 1>&2
+        exit 1
+    fi
     local domain="$1"
     local password="$2"
     if ! is_valid_domain "$domain"; then
@@ -35,6 +43,10 @@ create_testmail() {
 }
 
 plesk_get_testmail_credentials() {
+    if [[ $# -ne 1 ]]; then
+        printf "Error: Too many or no arguments provided\n" 1>&2
+        exit 1
+    fi
     local domain="$1"
     if ! is_valid_domain "$domain"; then
         printf "Error: Invalid input\n" 1>&2
@@ -52,3 +64,5 @@ plesk_get_testmail_credentials() {
 
     printf '{"login_link": "%s", "password": "%s", "new_email_created": %s}\n' "$login_link" "$password" "$new_email_created"
 }
+
+plesk_get_testmail_credentials "$@"
