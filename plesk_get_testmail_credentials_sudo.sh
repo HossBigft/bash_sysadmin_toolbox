@@ -20,7 +20,7 @@ get_mail_password() {
         printf "Error: Invalid input\n" 1>&2
         exit 1
     fi
-    /usr/local/psa/admin/bin/mail_auth_view | grep -F "${TEST_MAIL_LOGIN}@${domain}" | tr -d '[:space:]' | awk -F'|' '{print $4}'
+    /usr/local/psa/admin/bin/mail_auth_view | grep -F "${TEST_MAIL_LOGIN}@${domain}" | tr -d '[:space:]' | awk -F'|' '{print $4}' || true
 }
 
 create_testmail() {
