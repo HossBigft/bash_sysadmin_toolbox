@@ -27,7 +27,7 @@ generate_sudo_rules() {
 add_sudo_rules() {
     if [[ -n "$RULES" ]]; then
         printf "%b" "$RULES" | sudo EDITOR='tee -a' visudo
-        printf "Added the following sudoers rules:\n%b" "$RULES"
+        print_sudo_rules
     else
         printf "No new rules added. They already exist.\n"
     fi
@@ -42,7 +42,6 @@ main() {
     get_script_info
     generate_sudo_rules
     add_sudo_rules
-    print_sudo_rules
 }
 
 main
