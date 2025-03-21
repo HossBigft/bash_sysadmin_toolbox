@@ -6,18 +6,26 @@ set -o pipefail # don't hide errors within pipes
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/domain_validator.sh"
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/load_dotenv.sh"
 
-
 main() {
 
     if [[ $# -ne 1 ]]; then
         printf "Error: Too many or no arguments provided\n" 1>&2
         exit 1
     fi
-    declare domain="$1"
+    local domain="$1"
 
     if ! is_valid_domain "$domain"; then
         printf "Error: Invalid input\n" 1>&2
         exit 1
+    fi
+
+    local mysql_version
+    mysql_version="$(mysql --version)"
+    local mysql_cli_name=""
+    if [[ "$mysql_version" =~ 'MariaDB' ]]; then
+        mysql_cli_name='mariadb'
+    else
+        mysql_cli_name='mysql'
     fi
 
     DB_USER="$(\whoami)"
@@ -50,7 +58,7 @@ FROM (
 ) AS base;
 "
 
-    mysql --host="$DB_HOST" --user="$DB_USER" --password="$DB_PASS" --database="$DB_NAME" --batch --skip-column-names --raw -e  "$SQL_QUERY"
+    $mysql_cli_name --host="$DB_HOST" --user="$DB_USER" --password="$DB_PASS" --database="$DB_NAME" --batch --skip-column-names --raw -e "$SQL_QUERY"
 
 }
 main "$@"
