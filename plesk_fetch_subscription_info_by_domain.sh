@@ -4,6 +4,9 @@ set -o nounset  # abort on unbound variable
 set -o pipefail # don't hide errors within pipes
 
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/domain_validator.sh"
+source "$(\dirname "${BASH_SOURCE[0]}")/utils/load_dotenv.sh"
+
+
 main() {
 
     if [[ $# -ne 1 ]]; then
@@ -43,11 +46,11 @@ FROM (
         cl_id,
         name
     FROM domains 
-    WHERE name LIKE ?
+    WHERE name LIKE '$domain'
 ) AS base;
 "
 
-    mysql --host="$DB_HOST" --user="$DB_USER" --password="$DB_PASS" --database="$DB_NAME" --batch --raw -e "$SQL_QUERY" --execute="$domain"
+    mysql --host="$DB_HOST" --user="$DB_USER" --password="$DB_PASS" --database="$DB_NAME" --batch --skip-column-names --raw -e  "$SQL_QUERY"
 
 }
 main "$@"
