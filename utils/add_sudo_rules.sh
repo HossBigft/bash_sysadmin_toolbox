@@ -26,15 +26,15 @@ generate_sudo_rules() {
 
 add_sudo_rules() {
     if [[ -n "$RULES" ]]; then
-        printf "%b" "$RULES" | sudo EDITOR='tee -a' visudo
-        print_sudo_rules
+        printf "%b" "$RULES" | sudo EDITOR='tee -a' visudo >/dev/null 2>&1
+        print_sudo_rules  # Only print confirmed sudo rules
     else
         printf "No new rules added. They already exist.\n"
     fi
 }
 
 print_sudo_rules() {
-    printf "\nSudo rules:\n"
+    printf "\nAdded rules:\n"
     sudo -l -U "$USER_NAME" | grep 'NOPASSWD'
 }
 
