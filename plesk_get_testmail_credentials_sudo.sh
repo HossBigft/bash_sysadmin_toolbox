@@ -5,11 +5,6 @@ set -o pipefail # don't hide errors within pipes
 
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/domain_validator.sh"
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/generate_password.sh"
-#!/usr/bin/env bash
-
-set -o errexit  # Exit on error
-set -o nounset  # Treat unset variables as errors
-set -o pipefail # Fail pipeline if any command fails
 
 TEST_MAIL_LOGIN='testsupportmail'
 MAIL_DESCRIPTION='throwaway mail for troubleshooting purposes. You may delete it at will.'
@@ -56,12 +51,16 @@ plesk_get_testmail_credentials() {
     local login_link="https://webmail.${domain}/roundcube/index.php?_user=${TEST_MAIL_LOGIN}%40${domain}"
     local new_email_created=false
 
-    password="$(get_mail_password "$domain")"
-    if [[ -z "$password" ]]; then
-        local new_mail_password
-        new_mail_password="$(generate_password "$MAIL_PASSWORD_LENGTH")"
-        create_testmail "$domain" "$new_mail_password"
+    local existing_password
+    existing_password="$(get_mail_password "$domain")"
+    if [[ -z "$existing_password" ]]; then
+        local generated_password
+        generated_password="$(generate_password "$MAIL_PASSWORD_LENGTH")"
+        create_testmail "$domain" "$generated_password"
         new_email_created=true
+        password="$generated_password"
+    else
+        password="$existing_password"
     fi
 
     printf '{"login_link": "%s", "password": "%s", "new_email_created": %s}\n' "$login_link" "$password" "$new_email_created"
