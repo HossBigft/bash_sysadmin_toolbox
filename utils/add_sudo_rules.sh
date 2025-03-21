@@ -4,34 +4,45 @@ set -o nounset  # Treat unset variables as errors
 set -o pipefail # Fail pipeline if any command fails
 
 # Get absolute path of the script
-SCRIPT_PATH="$(realpath "$0")"
+get_script_info() {
+    SCRIPT_PATH="$(realpath "$0")"
+    USER_NAME="$(echo "$SCRIPT_PATH" | awk -F'/' '{print $3}')"
+    SCRIPTS_DIR="$(realpath "$(dirname "$SCRIPT_PATH")/..")"
+}
 
-# Extract username from the script path (assuming the format is /home/<user>/...)
-USER_NAME="$(echo "$SCRIPT_PATH" | awk -F'/' '{print $3}')"
+# Find all *_sudo.sh scripts and generate sudo rules
+generate_sudo_rules() {
+    RULES=""
+    for script in "${SCRIPTS_DIR}"/*_sudo.sh; do
+        [ -f "$script" ] || continue # Skip if no matching files
+        RULE="${USER_NAME} ALL=(ALL) NOPASSWD: ${script} *"
 
-# Get the directory containing this script (parent directory)
-SCRIPTS_DIR="$(dirname "$SCRIPT_PATH")"
+        # Add rule if it doesn't exist
+        if ! sudo grep -Fxq "$RULE" /etc/sudoers; then
+            RULES+="${RULE}\n"
+        fi
+    done
+}
 
-# Find all *_sudo.sh scripts in the parent directory
-RULES=""
-for script in "${SCRIPTS_DIR}"/*_sudo.sh; do
-    [ -f "$script" ] || continue  # Skip if no matching files
-    RULE="${USER_NAME} ALL=(ALL) NOPASSWD: ${script}"
-    
-    # Add rule if it doesn't exist
-    if ! sudo grep -Fxq "$RULE" /etc/sudoers; then
-        RULES+="${RULE}\n"
+add_sudo_rules() {
+    if [[ -n "$RULES" ]]; then
+        printf "%b" "$RULES" | sudo EDITOR='tee -a' visudo
+        printf "Added the following sudoers rules:\n%b" "$RULES"
+    else
+        printf "No new rules added. They already exist.\n"
     fi
-done
+}
 
-# If there are new rules, append them using visudo
-if [[ -n "$RULES" ]]; then
-    printf "%b" "$RULES" | sudo EDITOR='tee -a' visudo
-    printf "Added the following sudoers rules:\n%b" "$RULES"
-else
-    printf "No new rules added. They already exist.\n"
-fi
+print_sudo_rules() {
+    printf "\nSudo rules:\n"
+    sudo -l -U "$USER_NAME" | grep 'NOPASSWD'
+}
 
-# Verify updated sudoers file
-printf "\nUpdated sudoers file:\n"
-sudo -l -U "$USER_NAME"
+main() {
+    get_script_info
+    generate_sudo_rules
+    add_sudo_rules
+    print_sudo_rules
+}
+
+main
