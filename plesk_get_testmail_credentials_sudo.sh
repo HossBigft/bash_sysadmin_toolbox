@@ -53,12 +53,14 @@ plesk_get_testmail_credentials() {
         exit 1
     fi
     local password
-    password="$(generate_password "$MAIL_PASSWORD_LENGTH")"
     local login_link="https://webmail.${domain}/roundcube/index.php?_user=${TEST_MAIL_LOGIN}%40${domain}"
     local new_email_created=false
 
-    if [[ -z "$(get_mail_password "$domain")" ]]; then
-        create_testmail "$domain" "$password"
+    password="$(get_mail_password "$domain")"
+    if [[ -z "$password" ]]; then
+        local new_mail_password
+        new_mail_password="$(generate_password "$MAIL_PASSWORD_LENGTH")"
+        create_testmail "$domain" "$new_mail_password"
         new_email_created=true
     fi
 
