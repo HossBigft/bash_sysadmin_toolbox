@@ -14,4 +14,12 @@ validate_username() {
     return 0
 }
 
-validate_username "$@"
+# Only run this part when the script is executed directly
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    if [[ $# -eq 0 ]]; then
+        printf "Usage: %s <username>\n" "$(basename "$0")" >&2
+        exit 1
+    fi
+
+    validate_username "$1"
+fi
