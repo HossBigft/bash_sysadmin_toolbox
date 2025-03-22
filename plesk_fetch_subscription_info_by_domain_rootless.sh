@@ -1,39 +1,41 @@
 #!/usr/bin/env bash
-set -o errexit  # abort on nonzero exitstatus
-set -o nounset  # abort on unbound variable
-set -o pipefail # don't hide errors within pipes
+set -o errexit  # Abort on nonzero exit status
+set -o nounset  # Abort on unbound variable
+set -o pipefail # Don't hide errors within pipes
 
-source "$(\dirname "${BASH_SOURCE[0]}")/utils/domain_validator.sh"
-source "$(\dirname "${BASH_SOURCE[0]}")/utils/load_dotenv.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/utils/domain_validator.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/utils/load_dotenv.sh"
 
-main() {
-
+validate_input() {
     if [[ $# -ne 1 ]]; then
-        printf "Error: Too many or no arguments provided\n" 1>&2
+        printf "Error: Too many or no arguments provided\n" >&2
         exit 1
     fi
+
     local domain="$1"
 
     if ! is_valid_domain "$domain"; then
-        printf "Error: Invalid input\n" 1>&2
+        printf "Error: Invalid input\n" >&2
         exit 1
     fi
 
+    echo "$domain"
+}
+
+get_mysql_cli_name() {
     local mysql_version
     mysql_version="$(mysql --version)"
-    local mysql_cli_name=""
+    
     if [[ "$mysql_version" =~ 'MariaDB' ]]; then
-        mysql_cli_name='mariadb'
+        echo "mariadb"
     else
-        mysql_cli_name='mysql'
+        echo "mysql"
     fi
+}
 
-    DB_USER="$(\whoami)"
-    DB_PASS="$DATABASE_PASSWORD"
-    DB_NAME="psa"
-    DB_HOST="localhost"
-
-    SQL_QUERY="
+build_sql_query() {
+    local domain="$1"
+    cat <<EOF
 SELECT 
     base.subscription_id AS result,
     (SELECT name FROM domains WHERE id = base.subscription_id) AS name,
@@ -56,9 +58,33 @@ FROM (
     FROM domains 
     WHERE name LIKE '$domain'
 ) AS base;
-"
-
-    $mysql_cli_name --host="$DB_HOST" --user="$DB_USER" --password="$DB_PASS" --database="$DB_NAME" --batch --skip-column-names --raw -e "$SQL_QUERY"
-
+EOF
 }
+
+execute_query() {
+    local mysql_cli_name="$1"
+    local sql_query="$2"
+
+    local db_user
+    db_user="$(whoami)"
+    local db_pass="$DATABASE_PASSWORD"
+    local db_name="psa"
+    local db_host="localhost"
+
+    "$mysql_cli_name" --host="$db_host" --user="$db_user" --password="$db_pass" --database="$db_name" --batch --skip-column-names --raw -e "$sql_query"
+}
+
+main() {
+    local domain
+    domain="$(validate_input "$@")"
+
+    local mysql_cli_name
+    mysql_cli_name="$(get_mysql_cli_name)"
+
+    local sql_query
+    sql_query="$(build_sql_query "$domain")"
+
+    execute_query "$mysql_cli_name" "$sql_query"
+}
+
 main "$@"
