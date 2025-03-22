@@ -1,18 +1,27 @@
 #!/usr/bin/env bash
-set -o errexit  # abort on nonzero exitstatus
-set -o nounset  # abort on unbound variable
-set -o pipefail # don't hide errors within pipes
+set -o errexit  # Exit on error
+set -o nounset  # Treat unset variables as errors
+set -o pipefail # Don't hide errors within pipes
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ENV_FILE="${ENV_FILE:-$PROJECT_ROOT/.env}"  # Allow overriding .env path
 
 load_dotenv() {
-    ENV_FILE="$PROJECT_ROOT/.env"
     if [[ ! -f "$ENV_FILE" ]]; then
         echo "Error: $ENV_FILE not found" >&2
         exit 1
     fi
 
-    source <(cat "$ENV_FILE" | sed -e '/^#/d;/^\s*$/d' -e "s/'/'\\\''/g" -e "s/=\(.*\)/='\1'/g")
+    # Read .env file, ignoring comments & empty lines, and export variables
+    while IFS='=' read -r key value; do
+        key=$(echo "$key" | xargs)   # Trim whitespace
+        value=$(echo "$value" | xargs) # Trim whitespace
+        if [[ -n "$key" && "${key:0:1}" != "#" ]]; then
+            export "$key"="$value"
+        fi
+        
+    done < <(grep -Ev '^\s*#|^\s*$' "$ENV_FILE")
 }
+
 load_dotenv
