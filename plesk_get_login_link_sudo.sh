@@ -56,6 +56,11 @@ validate_admin_username() {
 }
 
 plesk_generate_subscription_login_link() {
+    if [[ $# -ne 2 ]]; then
+        printf "Error: Too many or no arguments provided\n" >&2
+        exit 1
+    fi
+
     local subscription_id="$1"
     validate
     local ssh_username="$2"
