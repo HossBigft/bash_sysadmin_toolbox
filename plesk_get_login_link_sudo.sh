@@ -62,7 +62,7 @@ plesk_generate_subscription_login_link() {
     fi
 
     local subscription_id="$1"
-    validate
+    validate_subscription_id "$subscription_id"
     local ssh_username="$2"
     validate_username "$ssh_username"
 
