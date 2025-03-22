@@ -40,7 +40,7 @@ plesk_fetch_plesk_login_link() {
 get_admin_list() {
     local admin_list
     local query
-    query='SELECT login FROM smb_users WHERE isLocked=0'
+    query='SELECT login FROM smb_users WHERE roleId=1 AND isLocked=0' # get list of admin users
     admin_list="$(execute_query "$query" | grep -v 'admin')" #exclude anonymous user
     echo "$admin_list"
 }
