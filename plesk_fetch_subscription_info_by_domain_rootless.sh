@@ -66,7 +66,7 @@ execute_query() {
     local sql_query="$2"
 
     local db_user
-    db_user="$(whoami)"
+    db_user="$DATABASE_USER"
     local db_pass="$DATABASE_PASSWORD"
     local db_name="psa"
     local db_host="localhost"
