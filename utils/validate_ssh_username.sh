@@ -13,3 +13,5 @@ validate_username() {
     fi
     return 0
 }
+
+validate_username "$@"

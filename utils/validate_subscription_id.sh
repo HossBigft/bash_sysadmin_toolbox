@@ -14,3 +14,5 @@ validate_subscription_id() {
 
     return 0
 }
+
+validate_subscription_id "$@"
