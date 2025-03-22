@@ -41,17 +41,16 @@ get_admin_list() {
     local admin_list
     local query
     query='SELECT login FROM smb_users WHERE roleId=1 AND isLocked=0' # get list of admin users
-    admin_list="$(execute_query "$query" | grep -v 'admin')" #exclude anonymous user
+    admin_list="$(execute_query "$query" | grep -v 'admin')"          #exclude anonymous user
     echo "$admin_list"
 }
 
 validate_admin_username() {
     local username="$1"
-    if get_admin_list | grep -wq "$username"; then
+    validate_username "$username"
+    if ! get_admin_list | grep -wq "$username"; then
         echo "Error: wrong username" >&2
         exit 1
-    else
-        exit 0
     fi
 }
 
@@ -64,7 +63,7 @@ plesk_generate_subscription_login_link() {
     local subscription_id="$1"
     validate_subscription_id "$subscription_id"
     local ssh_username="$2"
-    validate_username "$ssh_username"
+    validate_admin_username "$ssh_username"
 
     if ! is_subscription_id_exist "$subscription_id"; then
         echo "Error: Subscription with ID $subscription_id doesn't exist." >&2
