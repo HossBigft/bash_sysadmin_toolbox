@@ -6,8 +6,6 @@ set +x          # Disable debugging
 
 source "$(dirname "${BASH_SOURCE[0]}")/load_dotenv.sh" # Load dotenv
 
-MESSAGE=""
-SIGNATURE_B64=""
 WRAPPER_PARENT_INFO_DIR="/tmp/signed_executor/"
 USED_TOKENS_FILE="/tmp/signed_executor/used_tokens.txt" # File to store used tokens
 
@@ -27,8 +25,17 @@ ensure_used_tokens_file_exists() {
 # Function to extract message and signature from token
 extract_token_parts() {
     local token="$1"
-    MESSAGE="$(echo "$token" | rev | cut -d'|' -f2- | rev)"
-    SIGNATURE_B64="$(echo "$token" | rev | cut -d'|' -f1 | rev)"
+    local message signature_b64
+
+
+    local last_pipe_pos
+    last_pipe_pos="$(echo "$token" | grep -bo '|' | tail -1 | cut -d':' -f1)"
+
+    message="${token:0:$last_pipe_pos}"             # Everything before the last pipe
+    signature_b64="${token:$((last_pipe_pos + 1))}" # Everything after the last pipe
+
+
+    printf "%s\n%s" "$message" "$signature_b64"
 }
 
 # Function to verify the signature
@@ -114,11 +121,17 @@ main() {
     # Check if the token has already been used
     check_token_used "$token"
 
-    extract_token_parts "$token"
-    verify_signature "$MESSAGE" "$SIGNATURE_B64"
+    local message signature_b64
+    local token_parts
+    token_parts=$(extract_token_parts "$token")
+    local message
+    message="$(echo "$token_parts" | head -1)"
+    local signature_b64
+    signature_b64="$(echo "$token_parts" | tail -1)"
+
+    verify_signature "$message" "$signature_b64"
     local timestap nonce expiry command
-    # Extract token components from message
-    IFS='|' read -r timestap nonce expiry command <<<"$MESSAGE"
+    IFS='|' read -r timestap nonce expiry command <<<"$message"
 
     check_expiry "$expiry"
 
