@@ -3,7 +3,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-WRAPPER_NAME="verify_signature.sh"
+WRAPPER_NAME="signed_executor.sh"
 WRAPPER_PROCESS_INFO_TMP_PATH="/tmp/wrapper_process_info_"
 
 get_parent_info_file() {
