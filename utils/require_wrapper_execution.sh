@@ -6,19 +6,18 @@ set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/load_dotenv.sh" #Load dotenv
 
 WRAPPER_NAME="signed_executor.sh"
-
+WRAPPER_PROCESS_INFO_TMP_PATH="/tmp/signed_executor/parent_process_info_"
 
 get_parent_info_file() {
     local parent_info_file
-    parent_info_file="$(find "$WRAPPER_PROCESS_INFO_TMP_PATH"* -maxdepth 0 -type f -printf "%T@ %p\n"  2>/dev/null| sort -k1,1nr | awk '{print $2; exit}')"
-
+    parent_info_file="$(find "$WRAPPER_PROCESS_INFO_TMP_PATH"* -maxdepth 0 -type f -printf "%T@ %p\n" 2>/dev/null | sort -k1,1nr | awk '{print $2; exit}')"
 
     if [[ -z "$parent_info_file" ]]; then
         printf "ERROR: No parent info file found. Direct execution not allowed.\n" >&2
-        return 1  
+        return 1
     fi
 
-    echo "$parent_info_file" 
+    echo "$parent_info_file"
 }
 
 read_parent_info() {
