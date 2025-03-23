@@ -9,7 +9,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/load_dotenv.sh" #Load dotenv
 MESSAGE=""
 SIGNATURE_B64=""
 
-
 # Function to extract message and signature from token
 extract_token_parts() {
     local token="$1"
@@ -27,9 +26,12 @@ verify_signature() {
     signature_file="$(mktemp)"
 
     echo -n "$message" >"$message_file"
-    echo "$signature_b64" | base64 -d >"$signature_file"
+    echo "$signature_b64" | base64 -d >"$signature_file" 2> /dev/null || {
+        printf "ERROR: Malformed base64 signature.\n" >&2
+        exit 1
+    }
     if ! openssl pkeyutl -verify -pubin -inkey "$PUBLIC_KEY_FILE" -sigfile "$signature_file" -rawin -in "$message_file" 1>/dev/null; then
-        echo "ERROR: Invalid signature"
+        printf "ERROR: Invalid signature.\n" >&2
         rm -f "$message_file" "$signature_file"
         exit 1
     fi
@@ -43,7 +45,7 @@ check_expiry() {
     local current_time
     current_time="$(date +%s)"
     if [ "$current_time" -gt "$expiry_time" ]; then
-        echo "ERROR: Token has expired"
+        printf "ERROR: Token has expired.\n" >&2
         exit 1
     fi
 }
@@ -60,7 +62,7 @@ save_wrapper_process_info() {
 main() {
     local token="$1"
     if [ -z "$token" ]; then
-        echo "ERROR: No token provided"
+        printf "ERROR: No token provided.\n" >&2
         exit 1
     fi
 
