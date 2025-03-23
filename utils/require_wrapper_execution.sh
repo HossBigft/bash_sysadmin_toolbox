@@ -12,7 +12,7 @@ get_parent_info_file() {
 
 
     if [[ -z "$parent_info_file" ]]; then
-        echo "ERROR: No parent info file found."
+        printf "ERROR: No parent info file found. Direct execution not allowed.\n" >&2
         return 1  
     fi
 
