@@ -4,10 +4,11 @@ set -o nounset  # Abort on unbound variable
 set -o pipefail # Don't hide errors within pipes
 set +x          # disable debugging
 
-PUBLIC_KEY_FILE="ed25519_public.pem" # Ensure this file contains a valid Ed25519 public key
+source "$(dirname "${BASH_SOURCE[0]}")/load_dotenv.sh" #Load dotenv
+
 MESSAGE=""
 SIGNATURE_B64=""
-WRAPPER_PROCESS_INFO_TMP_PATH="/tmp/wrapper_process_info_"
+
 
 # Function to extract message and signature from token
 extract_token_parts() {
@@ -27,7 +28,6 @@ verify_signature() {
 
     echo -n "$message" >"$message_file"
     echo "$signature_b64" | base64 -d >"$signature_file"
-
     if ! openssl pkeyutl -verify -pubin -inkey "$PUBLIC_KEY_FILE" -sigfile "$signature_file" -rawin -in "$message_file" 1>/dev/null; then
         echo "ERROR: Invalid signature"
         rm -f "$message_file" "$signature_file"

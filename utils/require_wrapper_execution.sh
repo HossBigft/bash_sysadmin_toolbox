@@ -3,8 +3,10 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+source "$(dirname "${BASH_SOURCE[0]}")/load_dotenv.sh" #Load dotenv
+
 WRAPPER_NAME="signed_executor.sh"
-WRAPPER_PROCESS_INFO_TMP_PATH="/tmp/wrapper_process_info_"
+
 
 get_parent_info_file() {
     local parent_info_file
