@@ -6,6 +6,7 @@ set -o pipefail # don't hide errors within pipes
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/validate_ssh_username.sh"
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/validate_subscription_id.sh"
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/execute_mysql_cmd.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/utils/require_wrapper_execution.sh"
 
 REDIRECTION_HEADER="&success_redirect_url=%2Fadmin%2Fsubscription%2Foverview%2Fid%2F"
 
@@ -15,7 +16,7 @@ is_subscription_id_exist() {
 
     local get_subscription_name_cmd="plesk db -Ne \"SELECT name FROM domains WHERE webspace_id=0 AND id=$subscription_id\""
     local result
-    result=$(eval "$get_subscription_name_cmd" 2>/dev/null)
+    result="$(eval "$get_subscription_name_cmd" 2>/dev/null)"
 
     if [[ -z "$result" ]]; then
         return 1 # Subscription does not exist
@@ -55,6 +56,7 @@ validate_admin_username() {
 }
 
 plesk_generate_subscription_login_link() {
+    require_wrapper_execution
     if [[ $# -ne 2 ]]; then
         printf "Error: Too many or no arguments provided\n" >&2
         exit 1
