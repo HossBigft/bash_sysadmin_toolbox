@@ -6,7 +6,7 @@ set -o pipefail # don't hide errors within pipes
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/validate_ssh_username.sh"
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/validate_subscription_id.sh"
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/execute_mysql_cmd.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/utils/require_wrapper_execution.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/utils/wrapper_manager.sh"
 
 REDIRECTION_HEADER="&success_redirect_url=%2Fadmin%2Fsubscription%2Foverview%2Fid%2F"
 

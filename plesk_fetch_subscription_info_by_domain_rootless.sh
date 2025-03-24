@@ -6,7 +6,7 @@ set +x # disable debugging
 
 source "$(dirname "${BASH_SOURCE[0]}")/utils/domain_validator.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/utils/execute_mysql_cmd.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/utils/require_wrapper_execution.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/utils/wrapper_manager.sh"
 
 validate_input() {
     if [[ $# -ne 1 ]]; then

@@ -10,7 +10,7 @@ set -o pipefail # Don't hide errors within pipes
 set +x          # disable debugging
 
 
-source "$(dirname "${BASH_SOURCE[0]}")/utils/require_wrapper_execution.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/utils/wrapper_manager.sh"
 
 # Configuration
 readonly USED_TOKENS_FILE="${WRAPPER_PARENT_INFO_DIR}/used_tokens.txt"

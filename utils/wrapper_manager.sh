@@ -5,8 +5,8 @@ set -o pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/load_dotenv.sh" #Load dotenv
 
-WRAPPER_NAME="signed_executor_rootless.sh"
-WRAPPER_PROCESS_INFO_TMP_PATH="/tmp/signed_executor/parent_process_info_"
+readonly WRAPPER_NAME="signed_executor_rootless.sh"
+readonly WRAPPER_PROCESS_INFO_TMP_PATH="/tmp/signed_executor/parent_process_info_"
 readonly WRAPPER_PARENT_INFO_DIR="/tmp/signed_executor/"
 
 get_parent_info_file() {

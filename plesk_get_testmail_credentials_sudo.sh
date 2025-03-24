@@ -5,7 +5,7 @@ set -o pipefail # don't hide errors within pipes
 
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/domain_validator.sh"
 source "$(\dirname "${BASH_SOURCE[0]}")/utils/generate_password.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/utils/require_wrapper_execution.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/utils/wrapper_manager.sh"
 
 TEST_MAIL_LOGIN='testsupportmail'
 MAIL_DESCRIPTION='throwaway mail for troubleshooting purposes. You may delete it at will.'
