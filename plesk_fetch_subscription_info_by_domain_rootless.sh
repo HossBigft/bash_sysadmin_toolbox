@@ -6,6 +6,7 @@ set +x # disable debugging
 
 source "$(dirname "${BASH_SOURCE[0]}")/utils/domain_validator.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/utils/execute_mysql_cmd.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/utils/require_wrapper_execution.sh"
 
 validate_input() {
     if [[ $# -ne 1 ]]; then
@@ -52,6 +53,8 @@ EOF
 }
 
 main() {
+    require_wrapper_execution
+    
     local domain
     domain="$(validate_input "$@")"
 
