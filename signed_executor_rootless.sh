@@ -1,5 +1,5 @@
 #!/bin/bash
-# signed_executor.sh - Executes commands with cryptographic verification
+# signed_executor_rootless.sh - Executes commands with cryptographic verification
 #
 # This script verifies a signed token before executing the embedded command.
 # Format: timestamp|nonce|expiry|command|signature
