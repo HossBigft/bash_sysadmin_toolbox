@@ -7,6 +7,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/load_dotenv.sh" #Load dotenv
 
 WRAPPER_NAME="signed_executor_rootless.sh"
 WRAPPER_PROCESS_INFO_TMP_PATH="/tmp/signed_executor/parent_process_info_"
+readonly WRAPPER_PARENT_INFO_DIR="/tmp/signed_executor/"
 
 get_parent_info_file() {
     local parent_info_file
@@ -54,4 +55,23 @@ require_wrapper_execution() {
     read_parent_info "$parent_info_file"
     validate_caller_script
     validate_parent_process
+}
+
+# Save the parent process info
+save_process_info() {
+    local parent_pid="$$"
+    local caller_script="$0"
+    local parent_info_file="${WRAPPER_PARENT_INFO_DIR}/parent_process_info_${parent_pid}.txt"
+
+    log "INFO" "Saving parent process info (PID: $parent_pid)"
+    echo "$parent_pid" >"$parent_info_file"
+    echo "$caller_script" >>"$parent_info_file"
+}
+
+# Ensure directories and files exist
+ensure_wrapper_info_directory() {
+    if [[ ! -d "$WRAPPER_PARENT_INFO_DIR" ]]; then
+        mkdir -p "$WRAPPER_PARENT_INFO_DIR"
+        log "INFO" "Created directory: $WRAPPER_PARENT_INFO_DIR"
+    fi
 }

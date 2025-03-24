@@ -9,13 +9,16 @@ set -o nounset  # Abort on unbound variable
 set -o pipefail # Don't hide errors within pipes
 set +x          # disable debugging
 
-# Load environment variables
-source "$(dirname "${BASH_SOURCE[0]}")/utils/load_dotenv.sh"
+
+source "$(dirname "${BASH_SOURCE[0]}")/utils/require_wrapper_execution.sh"
 
 # Configuration
-readonly WRAPPER_PARENT_INFO_DIR="/tmp/signed_executor/"
 readonly USED_TOKENS_FILE="${WRAPPER_PARENT_INFO_DIR}/used_tokens.txt"
 readonly LOG_FILE="${WRAPPER_PARENT_INFO_DIR}/executor.log"
+
+source "$(dirname "${BASH_SOURCE[0]}")/utils/load_dotenv.sh" # Load environment variables
+
+source "$(dirname "${BASH_SOURCE[0]}")/utils/logging.sh"
 
 # Error codes
 readonly E_NO_TOKEN=1
@@ -26,31 +29,8 @@ readonly E_NO_PUBLIC_KEY=5
 readonly E_UNAUTHORIZED_COMMAND=5
 readonly E_GENERIC=99
 
-# Logging function
-log() {
-    local level="$1"
-    local message="$2"
-    local timestamp
-    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
-
-    if [[ -n "${LOG_FILE:-}" ]]; then
-        echo "[${timestamp}] [${level}] ${message}" >>"$LOG_FILE"
-    fi
-
-    # Print errors and warnings to stderr
-    if [[ "$level" == "ERROR" || "$level" == "WARNING" ]]; then
-        echo "[${level}] ${message}" >&2
-    elif [[ "$level" == "DEBUG" && -n "${DEBUG:-}" ]]; then
-        echo "[${level}] ${message}" >&2
-    fi
-}
-
 # Ensure directories and files exist
-ensure_directories() {
-    if [[ ! -d "$WRAPPER_PARENT_INFO_DIR" ]]; then
-        mkdir -p "$WRAPPER_PARENT_INFO_DIR"
-        log "INFO" "Created directory: $WRAPPER_PARENT_INFO_DIR"
-    fi
+ensure_log_files() {
 
     if [[ ! -f "$USED_TOKENS_FILE" ]]; then
         touch "$USED_TOKENS_FILE"
@@ -156,17 +136,6 @@ mark_token_as_used() {
     echo "$token" >>"$USED_TOKENS_FILE"
 }
 
-# Save the parent process info
-save_wrapper_process_info() {
-    local parent_pid="$$"
-    local caller_script="$0"
-    local parent_info_file="${WRAPPER_PARENT_INFO_DIR}/parent_process_info_${parent_pid}.txt"
-
-    log "INFO" "Saving parent process info (PID: $parent_pid)"
-    echo "$parent_pid" >"$parent_info_file"
-    echo "$caller_script" >>"$parent_info_file"
-}
-
 # Execute the command safely
 execute_command() {
     local command="$1"
@@ -240,7 +209,9 @@ main() {
     fi
 
     local token="$1"
-    ensure_directories
+
+    ensure_wrapper_info_directory
+    ensure_log_files
 
     # Check if the token has already been used
     if ! check_token_used "$token"; then
@@ -285,7 +256,7 @@ main() {
     fi
 
     # Save process info before executing the command
-    save_wrapper_process_info
+    save_process_info
 
     # Execute the command
     execute_command "$command"
