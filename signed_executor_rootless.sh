@@ -7,7 +7,7 @@
 set -o errexit  # Abort on nonzero exit status
 set -o nounset  # Abort on unbound variable
 set -o pipefail # Don't hide errors within pipes
-set +x # disable debugging
+set +x          # disable debugging
 
 # Load environment variables
 source "$(dirname "${BASH_SOURCE[0]}")/utils/load_dotenv.sh"
@@ -23,6 +23,7 @@ readonly E_TOKEN_USED=2
 readonly E_BAD_SIGNATURE=3
 readonly E_TOKEN_EXPIRED=4
 readonly E_NO_PUBLIC_KEY=5
+readonly E_UNAUTHORIZED_COMMAND=5
 readonly E_GENERIC=99
 
 # Logging function
@@ -203,6 +204,32 @@ ensure_public_key() {
     fi
 }
 
+# Function to validate that the command only runs authorized scripts
+validate_command() {
+    local command="$1"
+    local authorized_scripts=(
+        "./plesk_get_testmail_credentials_sudo.sh"
+        "./plesk_fetch_subscription_info_by_domain_rootless.sh"
+        "./dns_restart_service_for_domain_sudo.sh"
+        "./plesk_get_login_link_sudo.sh"
+    )
+
+    # Check if command contains at least one authorized script
+    local found=0
+    for script in "${authorized_scripts[@]}"; do
+        if [[ "$command" == *"$script"* ]]; then
+            found=1
+            break
+        fi
+    done
+
+    if [[ "$found" -eq 0 ]]; then
+        log "ERROR" "Command does not contain any authorized script"
+        return 1
+    fi
+
+    return 0
+}
 # Main function
 main() {
     ensure_public_key
@@ -248,7 +275,10 @@ main() {
     nonce=$(echo "$parsed_data" | sed -n '2p')
     expiry=$(echo "$parsed_data" | sed -n '3p')
     command=$(echo "$parsed_data" | sed -n '4p')
-
+    if ! validate_command "$command"; then
+        log "ERROR" "Command validation failed: $command"
+        return "$E_UNAUTHORIZED_COMMAND"
+    fi
     # Check if token has expired
     if ! check_expiry "$expiry"; then
         return $E_TOKEN_EXPIRED
