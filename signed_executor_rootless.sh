@@ -7,6 +7,7 @@
 set -o errexit  # Abort on nonzero exit status
 set -o nounset  # Abort on unbound variable
 set -o pipefail # Don't hide errors within pipes
+set +x # disable debugging
 
 # Load environment variables
 source "$(dirname "${BASH_SOURCE[0]}")/utils/load_dotenv.sh"
