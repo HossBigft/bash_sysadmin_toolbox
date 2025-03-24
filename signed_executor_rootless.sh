@@ -9,7 +9,7 @@ set -o nounset  # Abort on unbound variable
 set -o pipefail # Don't hide errors within pipes
 
 # Load environment variables
-source "$(dirname "${BASH_SOURCE[0]}")/load_dotenv.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/utils/load_dotenv.sh"
 
 # Configuration
 readonly WRAPPER_PARENT_INFO_DIR="/tmp/signed_executor/"
