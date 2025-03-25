@@ -13,6 +13,4 @@ ensure_permissions() {
 
     echo "Setting  root only permissions (700) for all files in $SCRIPT_DIR"
     find "$SCRIPT_DIR" -type f -exec chmod 700 {} +
-
-    append_sudo_rules_for_scripts
 }
