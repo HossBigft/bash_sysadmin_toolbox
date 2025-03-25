@@ -181,7 +181,7 @@ validate_command() {
         "./plesk_fetch_subscription_info_by_domain.sh"
         "./dns_restart_service_for.sh"
         "./plesk_get_login_link.sh"
-        "./signed_executor_rootless.sh"
+        "./signed_executor.sh"
     )
 
     # Check if command contains at least one authorized script
