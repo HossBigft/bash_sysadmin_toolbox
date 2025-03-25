@@ -22,9 +22,14 @@ generate_sudo_rules() {
     local rules=""
 
     for script in "${scripts_dir}"/*.sh; do
+    
+        #exclude init script 
+        if [[ "$(basename "$script")" == "init_executor_sudo.sh" ]]; then
+            continue
+        fi
         [ -f "$script" ] || continue # Skip if no matching files
         local rule="${user_name} ALL=(ALL) NOPASSWD: ${script} *"
-
+        
         # Add rule if it doesn't exist
         if ! sudo grep -Fxq "$rule" /etc/sudoers; then
             rules+="${rule}\n"
