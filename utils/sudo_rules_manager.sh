@@ -22,20 +22,19 @@ generate_sudo_rules() {
     local rules=""
 
     for script in "${scripts_dir}"/*.sh; do
-    
-        #exclude init script 
+
+        #exclude init script
         if [[ "$(basename "$script")" == "init_executor_sudo.sh" ]]; then
             continue
         fi
         [ -f "$script" ] || continue # Skip if no matching files
         local rule="${user_name} ALL=(ALL) NOPASSWD: ${script} *"
-        
+
         # Add rule if it doesn't exist
         if ! sudo grep -Fxq "$rule" /etc/sudoers; then
             rules+="${rule}\n"
         fi
     done
-
     echo -e "$rules"
 }
 
@@ -49,10 +48,6 @@ print_sudo_rules() {
 # Append new sudo rules if they are not already present
 append_sudoers_entry() {
     local rules="$1"
-    if [[ -z "$rules" ]]; then
-        printf "ERROR: rules argument is empty\n" >&2
-        exit 1
-    fi
 
     if [[ -n "$rules" ]]; then
         printf "%b" "$rules" | sudo EDITOR='tee -a' visudo >/dev/null 2>&1
@@ -71,6 +66,5 @@ append_sudo_rules_for_scripts() {
     # Generate rules
     rules="$(generate_sudo_rules "$user_name" "$scripts_dir")"
 
-    # Apply rules
     append_sudoers_entry "$rules"
 }
