@@ -37,7 +37,7 @@ read_parent_info() {
 
 validate_parent_process() {
     if ! ps -p "$parent_pid" >/dev/null 2>&1; then
-        echo "ERROR: Parent process $parent_pid does not exist!" >&2
+        printf "ERROR: Parent process %s does not exist. Direct execution not allowed.\n" "$parent_pid" >&2
         exit 1
     fi
 }
