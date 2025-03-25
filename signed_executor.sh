@@ -32,12 +32,12 @@ readonly E_GENERIC=99
 ensure_log_files() {
 
     if [[ ! -f "$USED_TOKENS_FILE" ]]; then
-        touch "$USED_TOKENS_FILE"
+        sudo -u "$DATABASE_USER" touch "$USED_TOKENS_FILE"
         log "INFO" "Created file: $USED_TOKENS_FILE"
     fi
 
     if [[ ! -f "$LOG_FILE" ]]; then
-        touch "$LOG_FILE"
+        sudo -u "$DATABASE_USER" touch "$LOG_FILE"
         log "INFO" "Created log file: $LOG_FILE"
     fi
 }

@@ -71,7 +71,7 @@ save_process_info() {
 # Ensure directories and files exist
 ensure_wrapper_info_directory() {
     if [[ ! -d "$WRAPPER_PARENT_INFO_DIR" ]]; then
-        mkdir -p "$WRAPPER_PARENT_INFO_DIR"
+        sudo -u "$DATABASE_USER" mkdir -p "$WRAPPER_PARENT_INFO_DIR"
         log "INFO" "Created directory: $WRAPPER_PARENT_INFO_DIR"
     fi
 }
