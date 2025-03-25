@@ -27,5 +27,10 @@ execute_query() {
     local mysql_cli_name
     mysql_cli_name="$(get_mysql_cli_name)"
 
+    if [[ "$db_user" = "root" ]]; then
+        printf "Error: Execution as root is not allowed.\n" >&2
+        exit 1
+    fi
+
     "$mysql_cli_name" --host="$db_host" --user="$db_user" --password="$db_pass" --database="$db_name" --batch --skip-column-names --raw -e "$sql_query"
 }
