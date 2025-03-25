@@ -177,10 +177,11 @@ ensure_public_key() {
 validate_command() {
     local command="$1"
     local authorized_scripts=(
-        "./plesk_get_testmail_credentials_sudo.sh"
-        "./plesk_fetch_subscription_info_by_domain_rootless.sh"
-        "./dns_restart_service_for_domain_sudo.sh"
-        "./plesk_get_login_link_sudo.sh"
+        "./plesk_get_testmail_credentials.sh"
+        "./plesk_fetch_subscription_info_by_domain.sh"
+        "./dns_restart_service_for.sh"
+        "./plesk_get_login_link.sh"
+        "./signed_executor_rootless.sh"
     )
 
     # Check if command contains at least one authorized script
