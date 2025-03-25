@@ -10,7 +10,7 @@ get_script_info() {
     local user_name
     user_name="$(echo "$script_path" | awk -F'/' '{print $3}')"
     local scripts_dir
-    scripts_dir="$(realpath "$(dirname "$script_path")/..")"
+    scripts_dir="$(realpath "$(dirname "$0")")"
 
     echo "$user_name" "$scripts_dir"
 }
@@ -21,7 +21,7 @@ generate_sudo_rules() {
     local scripts_dir="$2"
     local rules=""
 
-    for script in "${scripts_dir}"/*_sudo.sh; do
+    for script in "${scripts_dir}"/*.sh; do
         [ -f "$script" ] || continue # Skip if no matching files
         local rule="${user_name} ALL=(ALL) NOPASSWD: ${script} *"
 
@@ -42,8 +42,13 @@ print_sudo_rules() {
 }
 
 # Append new sudo rules if they are not already present
-add_sudo_rules() {
+append_sudoers_entry() {
     local rules="$1"
+    if [[ -z "$rules" ]]; then
+        printf "ERROR: rules argument is empty\n" >&2
+        exit 1
+    fi
+
     if [[ -n "$rules" ]]; then
         printf "%b" "$rules" | sudo EDITOR='tee -a' visudo >/dev/null 2>&1
         local username
@@ -54,16 +59,13 @@ add_sudo_rules() {
     fi
 }
 
-# Main function
-main() {
+append_sudo_rules_for_scripts() {
+    local user_name scripts_dir
     # Extract user and scripts directory
     read -r user_name scripts_dir <<<"$(get_script_info)"
-
     # Generate rules
     rules="$(generate_sudo_rules "$user_name" "$scripts_dir")"
 
     # Apply rules
-    add_sudo_rules "$rules"
+    append_sudoers_entry "$rules"
 }
-
-main
