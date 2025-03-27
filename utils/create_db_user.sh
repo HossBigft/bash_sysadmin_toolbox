@@ -5,7 +5,7 @@ set -o pipefail # don't hide errors within pipes
 
 source "$(dirname "${BASH_SOURCE[0]}")/generate_password.sh"
 
-readonly DB_USER="plesk_utils"
+readonly DB_USER="sysadmin_toolbox"
 readonly DB_USER_ENV_VARIABLE="DATABASE_USER"
 readonly DB_PASS_ENV_VARIABLE="DATABASE_PASSWORD"
 create_db_user() {
