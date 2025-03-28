@@ -4,6 +4,7 @@ set -o nounset  # Treat unset variables as errors
 set -o pipefail # Fail pipeline if any command fails
 
 source "$(dirname "${BASH_SOURCE[0]}")/load_dotenv.sh" #Load dotenv
+source "$(dirname "${BASH_SOURCE[0]}")/is_mysql_installed.sh"
 
 get_mysql_cli_name() {
     local mysql_version
@@ -17,8 +18,12 @@ get_mysql_cli_name() {
 }
 
 execute_query() {
-    local sql_query="$1"
+    if ! is_mysql_installed; then
+        printf "Error: MySQL not installed. Query not executed.\n" >&2
+        exit 1
+    fi
 
+    local sql_query="$1"
     local db_user
     db_user="$DATABASE_USER"
     local db_pass="$DATABASE_PASSWORD"

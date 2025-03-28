@@ -4,11 +4,18 @@ set -o nounset  # abort on unbound variable
 set -o pipefail # don't hide errors within pipes
 
 source "$(dirname "${BASH_SOURCE[0]}")/generate_password.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/is_mysql_installed.sh"
 
 readonly DB_USER="sysadmin_toolbox"
 readonly DB_USER_ENV_VARIABLE="DATABASE_USER"
 readonly DB_PASS_ENV_VARIABLE="DATABASE_PASSWORD"
 create_db_user() {
+
+    if ! is_mysql_installed; then
+        printf "MySQL not installed. Skipping db user creation.\n"
+        exit 1
+    fi
+
     local password
     password="$(generate_password 15)"
     local is_user_exists
