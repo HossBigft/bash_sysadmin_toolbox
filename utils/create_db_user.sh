@@ -13,7 +13,7 @@ create_db_user() {
 
     if ! is_mysql_installed; then
         printf "MySQL not installed. Skipping db user creation.\n"
-        exit 1
+        exit 0
     fi
 
     local password
